@@ -15,11 +15,11 @@ m.patch()
 
 import pickle
 
-dim = 8000
-latent_dim = 256
-intermediate_dim = 1024
+dim = 8000 # Size of MS vector
+latent_dim = 256 # Size of encoding space
+intermediate_dim = 1024 # Size of dense layers
 epsilon_std = 1.0
-# many predefined parameters here, but you can ignore most of them
+# Under the hood code, to process MS/MS information from original project.
 y_type = 'float32'
 x_type = 'float32'
 
@@ -207,16 +207,16 @@ x_decoded_mean = decoder_mean(h_decoded)
 vae = Model(inputs = [x,cond], outputs = x_decoded_mean)
 
 
-xcos_loss = cosine(x, x_decoded_mean)
+xcos_loss = cosine(x, x_decoded_mean) # Cosine loss to compare MS/MS vectors
 k1_loss = - 0.5 * K.sum(1 + z_log_var - K.square(z_mean) - K.exp(z_log_var), axis=-1)
-vae_loss = K.mean(10*xcos_loss + k1_loss)
+vae_loss = K.mean(10*xcos_loss + k1_loss) # Weighted loss
 
 vae.add_loss(vae_loss)
 vae.compile(optimizer=k.optimizers.Adam(0.003))
 vae.summary()
 # then do the training, note that we don't realy need a output accualy
 # vae.fit(y, epochs=10, batch_size=128, validation_data=(y, None))
-x, y = preproc_all()
-vae.fit([y,x], epochs = 15, batch_size = 64, shuffle = True)
+x, y = preproc_all() # Load data
+vae.fit([y,x], epochs = 15, batch_size = 64, shuffle = True) # Train
 
 vae.save('full_vae.h5')
